@@ -1,0 +1,6 @@
+# build & local
+.logs/
+bin/
+dist/
+*.log
+
