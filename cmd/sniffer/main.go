@@ -14,7 +14,7 @@ func main() {
 	host := flag.String("veh-host", "127.0.0.1", "vehicle host")
 	flag.Parse()
 
-	laddr := &net.UDPAddr{IP: net.ParseIP("0.0.0.0"), Port: *local}
+	laddr := &net.UDPAddr{IP: net.ParseIP("127.0.0.1"), Port: *local}
 	conn, err := net.ListenUDP("udp", laddr)
 	if err != nil {
 		log.Fatalf("bind %v: %v", laddr, err)
