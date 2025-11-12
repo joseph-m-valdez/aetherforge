@@ -1,13 +1,22 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
+	// Create a context that is canceled when SIGINT or SIGTERM is received
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop() // Ensure the signal listener is stopped when main exits
+
 	// GCS listen port and vehicle port
 	local := flag.Int("local", 14550, "local listen port (PX4 remote_port)")
 	vehPort := flag.Int("veh-port", 14540, "vehicle udp_port (from 'mavlink status')")
@@ -25,22 +34,50 @@ func main() {
 	fmt.Printf("listening on %s; announcing to %s…\n", laddr.String(), raddr.String())
 
 	// === ANNOUNCE ONCE ===
-	// Any small payload works just to register our (IP,port).
 	if _, err := conn.WriteToUDP([]byte{0x01}, raddr); err != nil {
 		log.Fatalf("announce failed: %v", err)
 	}
 
-	// === READ LOOP ===
-	buf := make([]byte, 2048)
-	for {
-		n, from, err := conn.ReadFromUDP(buf)
-		if err != nil {
-			log.Printf("read: %v", err)
-			continue
+	// Channel to notify main that the read loop is done
+	done := make(chan struct{})
+
+	// Run the UDP read loop in a goroutine
+	go func() {
+		defer close(done)
+		buf := make([]byte, 2048)
+		for {
+			_ = conn.SetReadDeadline(time.Now().Add(3 * time.Second))
+			n, from, err := conn.ReadFromUDP(buf)
+			if err != nil {
+				if ne, ok := err.(net.Error); ok && ne.Timeout() {
+					// on read timeout, check if context is done (signal received)
+					select {
+					case <-ctx.Done():
+						return
+					default:
+						continue
+					}
+				}
+				log.Printf("read: %v", err)
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					continue
+				}
+			}
+			fmt.Printf("recv %4dB from %-21s  hex: % x\n", n, from.String(), buf[:min(n, 32)])
 		}
-		fmt.Printf("recv %4dB from %-21s  hex: % x\n", n, from.String(), buf[:min(n, 32)])
-	}
+	}()
+
+	// Wait for signal cancellation (Ctrl-C or SIGTERM)
+	<-ctx.Done()
+	fmt.Println("\nShutting down gracefully...")
+
+	// Close UDP here to unblock read
+	conn.Close()
+
+	// Wait for goroutine to finish cleanly
+	<-done
+	fmt.Println("bye")
 }
-
-func min(a, b int) int { if a < b { return a }; return b }
-
