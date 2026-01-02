@@ -147,7 +147,7 @@ func parseFrame(buf []byte, n int) (frame, bool) {
 }
 
 func tryHeartbeat(f frame) (Heartbeat, bool) {
-	if f.MsgID != 0 && len(f.Payload) != 9 {
+	if f.MsgID != 0 || len(f.Payload) != 9 {
 		return Heartbeat{}, false
 	}
 	p := f.Payload
