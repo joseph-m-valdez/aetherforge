@@ -82,7 +82,15 @@ func main() {
 					}, "", " ")
 					fmt.Println(string(b))
 					// continue
-				} // else: ignore other msgIDs
+				} else if lat, lon, alt, ok := tryGlobalPosition(f); ok {
+					b, _ := json.MarshalIndent(map[string]any{
+						"msg": "GLOBAL_POSITION_INT",
+						"lat": lat, "lon": lon, "alt_m": alt,
+					}, "", " ")
+					fmt.Println(string(b))
+					// continue
+				}
+				// else: ignore other msgIDs
 			}
 		}
 	}()
@@ -153,3 +161,19 @@ func tryHeartbeat(f frame) (Heartbeat, bool) {
 	return hb, true
 }
 
+func tryGlobalPosition(f frame) (latitude, longitude, altitude float64, ok bool) {
+	if f.MsgID != 33 || len(f.Payload) < 28 {
+		return 0, 0, 0, false
+	}
+	p := f.Payload
+
+	latInt := int32(binary.LittleEndian.Uint32(p[4:8]))
+	lonInt := int32(binary.LittleEndian.Uint32(p[8:12]))
+	altMM := int32(binary.LittleEndian.Uint32(p[12:16]))
+
+	lat := float64(latInt) / 1e7
+	lon := float64(lonInt) / 1e7
+	alt := float64(altMM) / 1000.0
+
+	return lat, lon, alt, true
+}
