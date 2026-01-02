@@ -52,7 +52,7 @@ func main() {
 		buf := make([]byte, 2048)
 		for {
 			_ = conn.SetReadDeadline(time.Now().Add(3 * time.Second))
-			n, from, err := conn.ReadFromUDP(buf)
+			n, _, err := conn.ReadFromUDP(buf)
 			if err != nil {
 				if ne, ok := err.(net.Error); ok && ne.Timeout() {
 					// on read timeout, check if context is done (signal received)
@@ -71,11 +71,18 @@ func main() {
 					continue
 				}
 			}
-			if heartbeat, err := parseMAVLinkPacket(buf, n); err == nil {
-				hbJSON, _ := json.MarshalIndent(heartbeat, "", " ")
-				armed := (heartbeat.BaseMode & 0x80) != 0
-				fmt.Printf("Armed: %v\n", armed)
-				fmt.Printf("recv HEARTBEAT from %-21s:\n%s\n", from.String(), string(hbJSON))
+			if f, ok := parseFrame(buf, n); ok {
+				if hb, ok := tryHeartbeat(f); ok {
+					armed := (hb.BaseMode & 0x80) != 0
+					b, _ := json.MarshalIndent(map[string]any{
+						"msg":  "HEARTBEAT",
+						"type": hb.Type, "autopilot": hb.Autopilot,
+						"base_mode": hb.BaseMode, "armed": armed,
+						"custom_mode": hb.CustomMode, "system_status": hb.SystemStatus,
+					}, "", " ")
+					fmt.Println(string(b))
+					// continue
+				} // else: ignore other msgIDs
 			}
 		}
 	}()
@@ -89,32 +96,60 @@ func main() {
 	fmt.Println("bye")
 }
 
-func parseMAVLinkPacket(buf []byte, n int) (*Heartbeat, error) {
-	// Ensure buffer is at least long enough for MAVLink v2 header (10 bytes)
-	if n < 10 || buf[0] != 0xFD {
-		return nil, fmt.Errorf("not a valid MAVLink v2 packet")
-	}
-	// Extract header fields
-	payloadLen := int(buf[1])
-	msgID := uint32(buf[7]) | uint32(buf[8])<<8 | uint32(buf[9])<<16
-
-	if msgID != 0 || payloadLen != 9 {
-		return nil, fmt.Errorf("not a HEARTBEAT message")
-	}
-
-	// Ensure buffer has enough data for header (10) + payload (9) + checksum (2)
-	if n < 10+9+2 {
-		return nil, fmt.Errorf("packet too short")
-	}
-	// Extract payload (bytes 10 to 18)
-	payload := buf[10 : 10+9]
-	heartbeat := &Heartbeat{
-		Type:         payload[4],
-		Autopilot:    payload[5],
-		BaseMode:     payload[6],
-		CustomMode:   binary.LittleEndian.Uint32(payload[0:4]),
-		SystemStatus: payload[7],
-	}
-	// TODO: Verify checksum (bytes 19-20)
-	return heartbeat, nil
+type frame struct {
+	Len     int
+	SysID   uint8
+	CompID  uint8
+	MsgID   uint32
+	Payload []byte
 }
+
+const (
+	headerLen = 10
+	crcLen    = 2
+)
+
+func parseFrame(buf []byte, n int) (frame, bool) {
+	if n < headerLen+crcLen {
+		// too short to be v2 header+crc
+		return frame{}, false
+	}
+
+	if buf[0] != 0xFD {
+		// not MAVLink V2
+		return frame{}, false
+	}
+
+	pl := int(buf[1])
+	total := headerLen + pl + crcLen
+
+	if n < total {
+		// incomplete frame in this datagram
+		return frame{}, false
+	}
+
+	f := frame{
+		Len:     pl,
+		SysID:   buf[5],
+		CompID:  buf[6],
+		MsgID:   uint32(buf[7]) | uint32(buf[8])<<8 | uint32(buf[9])<<16,
+		Payload: buf[10 : 10+pl],
+	}
+	return f, true
+}
+
+func tryHeartbeat(f frame) (Heartbeat, bool) {
+	if f.MsgID != 0 && len(f.Payload) != 9 {
+		return Heartbeat{}, false
+	}
+	p := f.Payload
+	hb := Heartbeat{
+		Type:         p[4],
+		Autopilot:    p[5],
+		BaseMode:     p[6],
+		CustomMode:   binary.LittleEndian.Uint32(p[0:4]),
+		SystemStatus: p[7],
+	}
+	return hb, true
+}
+
