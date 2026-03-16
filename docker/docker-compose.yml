@@ -1,0 +1,14 @@
+services:
+  px4-sitl:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - PX4_HOME_LAT=${PX4_HOME_LAT:-47.397742}
+      - PX4_HOME_LON=${PX4_HOME_LON:-8.545594}
+      - PX4_HOME_ALT=${PX4_HOME_ALT:-488.0}
+      - PX4_SYS_AUTOSTART=10043
+      - PX4_SIM_MODEL=sihsim_standard_vtol

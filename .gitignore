@@ -4,3 +4,9 @@ bin/
 dist/
 *.log
 
+# PX4 source (large, cloned separately)
+PX4-Autopilot/
+
+# Local environment overrides
+.env
+

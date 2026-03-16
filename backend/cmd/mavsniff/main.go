@@ -30,8 +30,9 @@ func main() {
 	local := flag.Int("local", 14550, "local listen port (PX4 remote_port)")
 	vehPort := flag.Int("veh-port", 14540, "vehicle udp_port (from 'mavlink status')")
 	host := flag.String("veh-host", "127.0.0.1", "vehicle host")
+	bind := flag.String("bind", "0.0.0.0", "local bind address")
 	flag.Parse()
-	laddr := &net.UDPAddr{IP: net.ParseIP("127.0.0.1"), Port: *local}
+	laddr := &net.UDPAddr{IP: net.ParseIP(*bind), Port: *local}
 	conn, err := net.ListenUDP("udp", laddr)
 	if err != nil {
 		log.Fatalf("bind %v: %v", laddr, err)
