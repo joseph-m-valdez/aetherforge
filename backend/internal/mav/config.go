@@ -1,7 +1,18 @@
 package mav
 
+const (
+	DefaultSystemID byte = 255
+)
+
 type Config struct {
-	ListenAddr  string // e.g. "0.0.0.0:14550"
-	OutSystemID byte   // e.g. 254 (GCS)
+	ListenAddr  string
+	OutSystemID byte
+}
+
+func NewConfig() Config {
+	return Config{
+		ListenAddr: "0.0.0.0:14550", // Standard GCS listning port
+		OutSystemID: DefaultSystemID, // Default to GCS ID
+	}
 }
 
