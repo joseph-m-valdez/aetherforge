@@ -25,6 +25,10 @@ func New() *Hub {
 	}
 }
 
+func (h *Hub) Broadcast(msg []byte) {
+	h.broadcast <- msg
+}
+
 func (h *Hub) Run(ctx context.Context) {
 	for {
 		select {
