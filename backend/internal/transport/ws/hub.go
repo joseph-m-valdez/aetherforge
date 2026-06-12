@@ -3,6 +3,7 @@ package ws
 import (
 	"context"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/coder/websocket"
@@ -52,6 +53,30 @@ func (h *Hub) Run(ctx context.Context) {
 					c.CloseNow()
 				}
 			}
+		}
+	}
+}
+
+func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	conn, err := websocket.Accept(w, r, nil)
+	if err != nil {
+		log.Printf("%v", err)
+		return
+	}
+	defer conn.CloseNow()
+
+	h.register <- conn
+
+	for {
+		_, _, err = conn.Read(r.Context())
+		if websocket.CloseStatus(err) == websocket.StatusNormalClosure {
+			h.unregister <- conn
+			return
+		}
+		if err != nil {
+			log.Printf("failed to echo with %v: %v", r.RemoteAddr, err)
+			h.unregister <- conn
+			return
 		}
 	}
 }
