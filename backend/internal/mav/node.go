@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/bluenviron/gomavlib/v3"
 	"github.com/bluenviron/gomavlib/v3/pkg/dialects/common"
+	"github.com/jmvaldez/aetherforge/internal/store"
+	"github.com/jmvaldez/aetherforge/internal/telemetry"
 )
 
 type Node struct {
@@ -35,7 +38,7 @@ func (n *Node) events() <-chan gomavlib.Event { return n.node.Events() }
 
 func (n *Node) Close() { n.node.Close() }
 
-func (n *Node) Run(ctx context.Context) error {
+func (n *Node) Run(ctx context.Context, st *store.Store) error {
 	errCh := make(chan error, 1)
 	done := make(chan struct{})
 	go func() {
@@ -44,16 +47,11 @@ func (n *Node) Run(ctx context.Context) error {
 		for event := range n.events() {
 			switch event := event.(type) {
 			case *gomavlib.EventFrame:
-				switch msg := event.Frame.GetMessage().(type) {
-				case *common.MessageHeartbeat:
-					log.Printf("received heartbeat (type %d)\n", msg.Type)
-				case *common.MessageAttitude:
-					log.Printf("Roll: (type %v)\n", msg.Roll)
-					log.Printf("RollSpeed: (type %v)\n", msg.Rollspeed)
-					log.Printf("ID: (type %d)\n", msg.GetID())
-				default:
-					// unknown message type... ignore for now
-				}
+				sysID := event.Frame.GetSystemID()
+				compID := event.Frame.GetComponentID()
+				newState := telemetry.Apply(st.Get(sysID), sysID, compID, event.Frame.GetMessage(), time.Now())
+				st.Update(sysID, newState)
+				log.Printf("fleet: %+v\n", st.Snapshot())
 			case *gomavlib.EventChannelOpen:
 				log.Printf("channel opened: %v\n", event.Channel)
 			case *gomavlib.EventChannelClose:

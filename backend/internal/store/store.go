@@ -8,7 +8,7 @@ import (
 )
 
 type Store struct {
-	rwmu         sync.RWMutex
+	rwmu     sync.RWMutex
 	vehicles map[uint8]telemetry.VehicleState
 }
 
@@ -18,6 +18,12 @@ func New() *Store {
 		vehicles: vstate,
 	}
 	return store
+}
+
+func (s *Store) Get(sysID uint8) telemetry.VehicleState {
+	s.rwmu.RLock()
+	defer s.rwmu.RUnlock()
+	return s.vehicles[sysID]
 }
 
 func (s *Store) Update(sysID uint8, state telemetry.VehicleState) {

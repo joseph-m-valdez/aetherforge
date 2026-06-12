@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/jmvaldez/aetherforge/internal/mav"
+	"github.com/jmvaldez/aetherforge/internal/store"
 )
 
 func main() {
@@ -28,7 +29,9 @@ func main() {
 		log.Fatalf("err: %v", err)
 	}
 
-	err = node.Run(ctx)
+	st := store.New()
+
+	err = node.Run(ctx, st)
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}
