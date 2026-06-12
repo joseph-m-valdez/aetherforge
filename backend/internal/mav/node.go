@@ -2,7 +2,6 @@ package mav
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"time"
