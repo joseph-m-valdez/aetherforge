@@ -1,19 +1,57 @@
 package ws
 
-import "github.com/coder/websocket"
+import (
+	"context"
+	"log"
+	"time"
+
+	"github.com/coder/websocket"
+)
 
 type Hub struct {
-	clients             map[*websocket.Conn]bool
-	chRegistrations     chan *websocket.Conn
-	chUnregistrations   chan *websocket.Conn
-	chBroadcastMessages chan []byte
+	clients    map[*websocket.Conn]bool
+	register   chan *websocket.Conn
+	unregister chan *websocket.Conn
+	broadcast  chan []byte
 }
 
 func New() *Hub {
 	return &Hub{
-		clients:             make(map[*websocket.Conn]bool),
-		chRegistrations:     make(chan *websocket.Conn, 16),
-		chUnregistrations:   make(chan *websocket.Conn, 16),
-		chBroadcastMessages: make(chan []byte, 16),
+		clients:    make(map[*websocket.Conn]bool),
+		register:   make(chan *websocket.Conn, 16),
+		unregister: make(chan *websocket.Conn, 16),
+		broadcast:  make(chan []byte, 16),
+	}
+}
+
+func (h *Hub) Run(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			for c := range h.clients {
+				c.CloseNow()
+			}
+			return
+		case conn := <-h.register:
+			h.clients[conn] = true
+			log.Println("Client registered")
+		case conn := <-h.unregister:
+			if _, ok := h.clients[conn]; ok {
+				delete(h.clients, conn)
+				conn.CloseNow()
+			}
+		case msg := <-h.broadcast:
+			for c := range h.clients {
+				writeCtx, cancel := context.WithTimeout(
+					context.Background(), 5*time.Second,
+				)
+				err := c.Write(writeCtx, websocket.MessageText, msg)
+				cancel()
+				if err != nil {
+					delete(h.clients, c)
+					c.CloseNow()
+				}
+			}
+		}
 	}
 }
