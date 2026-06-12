@@ -11,7 +11,7 @@ type Config struct {
 
 func NewConfig() Config {
 	return Config{
-		ListenAddr: "0.0.0.0:14550", // Standard GCS listning port
+		ListenAddr: "0.0.0.0:14550", // Standard GCS listening port
 		OutSystemID: DefaultSystemID, // Default to GCS ID
 	}
 }

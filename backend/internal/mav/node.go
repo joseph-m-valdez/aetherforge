@@ -52,8 +52,6 @@ func (n *Node) Run(ctx context.Context, st *store.Store) error {
 				compID := event.Frame.GetComponentID()
 				newState := telemetry.Apply(st.Get(sysID), sysID, compID, event.Frame.GetMessage(), time.Now())
 				st.Update(sysID, newState)
-				b, _ := json.MarshalIndent(st.Snapshot(), "", "  ")
-				log.Printf("fleet:\n%s", b)
 			case *gomavlib.EventChannelOpen:
 				log.Printf("channel opened: %v\n", event.Channel)
 			case *gomavlib.EventChannelClose:
@@ -76,7 +74,7 @@ func (n *Node) Run(ctx context.Context, st *store.Store) error {
 	select {
 	// Wait for Signal cancellation Ctrl-C or SIGTERM
 	case <-ctx.Done():
-		fmt.Println("\nShutting down gracefully...")
+		log.Println("\nShutting down gracefully...")
 		err = nil
 	case err = <-errCh:
 	}

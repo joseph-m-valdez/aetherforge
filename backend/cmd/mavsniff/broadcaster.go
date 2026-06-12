@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/jmvaldez/aetherforge/internal/store"
@@ -23,8 +23,8 @@ func startBroadcaster(ctx context.Context, st *store.Store, hub *ws.Hub) {
 
 			fleetToJSON, err := json.Marshal(fleet)
 			if err != nil {
-				fmt.Println(err)
-				return
+				log.Println(err)
+				continue
 			}
 			hub.Broadcast(fleetToJSON)
 		}

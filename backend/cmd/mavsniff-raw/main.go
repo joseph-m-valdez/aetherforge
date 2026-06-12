@@ -91,14 +91,12 @@ func main() {
 						"custom_mode": hb.CustomMode, "system_status": hb.SystemStatus,
 					}, "", " ")
 					fmt.Println(string(b))
-					// continue
 				} else if lat, lon, alt, ok := tryGlobalPosition(f); ok {
 					b, _ := json.MarshalIndent(map[string]any{
 						"msg": "GLOBAL_POSITION_INT",
 						"lat": lat, "lon": lon, "alt_m": alt,
 					}, "", " ")
 					fmt.Println(string(b))
-					// continue
 				}
 				// else: ignore other msgIDs
 			}
