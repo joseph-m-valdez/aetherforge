@@ -62,7 +62,9 @@ func (h *Hub) Run(ctx context.Context) {
 }
 
 func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	conn, err := websocket.Accept(w, r, nil)
+	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
+		OriginPatterns: []string{"localhost:5173"},
+	})
 	if err != nil {
 		log.Printf("%v", err)
 		return
@@ -73,7 +75,8 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		_, _, err = conn.Read(r.Context())
-		if websocket.CloseStatus(err) == websocket.StatusNormalClosure {
+		status := websocket.CloseStatus(err)
+		if status == websocket.StatusNormalClosure || status == websocket.StatusGoingAway {
 			h.unregister <- conn
 			return
 		}
