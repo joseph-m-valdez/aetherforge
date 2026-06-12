@@ -25,4 +25,4 @@ sed -i "s/mavlink start -x -u \$udp_offboard_port_local -r 4000000/& -t ${HOST_I
 
 # --- Launch PX4 ----------------------------------------------------------
 cd "${FIRMWARE_DIR}/build"
-exec ./bin/px4 -d
+exec ./bin/px4 -i ${PX4_INSTANCE:-0} -d

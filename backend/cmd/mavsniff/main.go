@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
-	"fmt"
 	"log"
 	"os/signal"
 	"syscall"
@@ -13,16 +11,10 @@ import (
 )
 
 func main() {
-	// Parse flags
-	local := flag.Int("local", 14550, "local listen port (PX4 remote_port)")
-	bind := flag.String("bind", "0.0.0.0", "local bind address")
-	flag.Parse()
-
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
 	cfg := mav.NewConfig()
-	cfg.ListenAddr = fmt.Sprintf("%s:%d", *bind, *local)
 
 	node, err := mav.New(cfg)
 	if err != nil {

@@ -2,6 +2,7 @@ package mav
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -51,7 +52,8 @@ func (n *Node) Run(ctx context.Context, st *store.Store) error {
 				compID := event.Frame.GetComponentID()
 				newState := telemetry.Apply(st.Get(sysID), sysID, compID, event.Frame.GetMessage(), time.Now())
 				st.Update(sysID, newState)
-				log.Printf("fleet: %+v\n", st.Snapshot())
+				b, _ := json.MarshalIndent(st.Snapshot(), "", "  ")
+				log.Printf("fleet:\n%s", b)
 			case *gomavlib.EventChannelOpen:
 				log.Printf("channel opened: %v\n", event.Channel)
 			case *gomavlib.EventChannelClose:
