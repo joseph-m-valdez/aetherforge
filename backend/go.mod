@@ -7,6 +7,7 @@ toolchain go1.24.6
 require github.com/bluenviron/gomavlib/v3 v3.3.0
 
 require (
+	github.com/coder/websocket v1.8.14 // indirect
 	github.com/creack/goselect v0.1.2 // indirect
 	github.com/pion/logging v0.2.2 // indirect
 	github.com/pion/transport/v2 v2.2.10 // indirect
