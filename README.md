@@ -10,11 +10,17 @@ MAVLink v2 telemetry platform for tracking and managing drone fleets.
 ## Project Structure
 
 ```
-backend/          Go backend (mavsniff CLI, telemetry processing)
-docker/           Docker Compose for PX4 SITL simulation
-frontend/         (planned) Web dashboard
-docs/             (planned) Documentation
+backend/              Go backend (mavsniff CLI, telemetry processing)
+docker/               Docker Compose for PX4 SITL simulation
+frontend/             pnpm workspace for the web side
+  apps/web/           Dashboard app (React, Vite, Cesium map)
+  packages/ui/        Design tokens + accessible primitives, documented in Storybook
+docs/                 (planned) Documentation
 ```
+
+The web side is a pnpm workspace. Install once from `frontend/` with `pnpm install`.
+Run the app with `pnpm dev` and the component library with `pnpm storybook`, both
+from the `frontend/` directory.
 
 ## Quick Start
 
@@ -58,3 +64,15 @@ Listens on `0.0.0.0:14550` and prints parsed MAVLink telemetry (heartbeats, GPS 
 ```bash
 docker compose -f docker/docker-compose.yml down
 ```
+
+## Maps (dev only)
+
+The dashboard renders a Cesium globe. Right now it pulls map tiles from
+OpenStreetMap's public tile server. This is for local development only. OSM's
+tile usage policy does not cover production or app traffic, so do not ship it
+as it stands.
+
+For production, switch the tile source to a keyed provider such as MapTiler,
+Stadia Maps, or Thunderforest. The only change needed is the `TILE_URL`
+constant in `frontend/apps/web/src/components/CesiumMap.tsx`. Serving tiles
+offline is a separate piece of work we have put off for later.

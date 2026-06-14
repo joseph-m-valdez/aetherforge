@@ -1,0 +1,6 @@
+/* The whole design system (Tailwind, tokens, base resets, touch handling) comes
+ * from the ui package. This is the only place the app pulls it in. */
+@import '@aetherforge/ui/styles/globals.css';
+
+/* Generate utilities for the class names used in this app's own source. */
+@source './**/*.{ts,tsx}';

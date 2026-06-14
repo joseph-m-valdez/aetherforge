@@ -1,0 +1,61 @@
+@import 'tailwindcss';
+@import './theme.css';
+
+/* Generate utilities for class names used inside this package's source. Apps
+ * that consume this file add their own `@source` for their own src. */
+@source '../**/*.{ts,tsx}';
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Touch / Apple Pencil: drop the 300ms tap delay and the grey tap flash, and
+   * suppress the iOS long-press callout on controls. Pinch-zoom stays available
+   * for accessibility (we never set user-scalable=no). */
+  button,
+  [role='button'],
+  a,
+  label,
+  summary,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button,
+  [role='button'] {
+    -webkit-touch-callout: none;
+  }
+
+  /* Visible keyboard focus everywhere. Interaction must never depend on hover
+   * alone, so this ring is the baseline affordance for keyboard and switch
+   * users. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Thin instrument-style scrollbars. */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+  }
+}
