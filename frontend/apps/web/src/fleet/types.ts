@@ -1,16 +1,18 @@
 // PX4 flight modes, as decoded from HEARTBEAT.custom_mode (main+sub mode).
 export type FlightMode =
   | 'MANUAL'
-  | 'STABILIZED'
-  | 'ACRO'
   | 'ALTCTL'
   | 'POSCTL'
-  | 'OFFBOARD'
-  | 'AUTO.MISSION'
-  | 'AUTO.LOITER'
-  | 'AUTO.RTL'
+  | 'AUTO.READY'
   | 'AUTO.TAKEOFF'
+  | 'AUTO.LOITER'
+  | 'AUTO.MISSION'
+  | 'AUTO.RTL'
   | 'AUTO.LAND'
+  | 'ACRO'
+  | 'OFFBOARD'
+  | 'STABILIZED'
+  | 'UNKNOWN';
 
 export type VehicleStatus = 'nominal' | 'warning' | 'critical' | 'offline'
 

@@ -18,7 +18,7 @@ func Apply(state VehicleState, sysID, compID uint8, msg any, now time.Time) Vehi
 		state.BaseMode = uint8(m.BaseMode)
 		state.CustomMode = m.CustomMode
 		state.SystemStatus = uint8(m.SystemStatus)
-		state.Armed = (uint8(m.BaseMode) & 0x80) != 0 // MAV_MODE_FLAG_SAFETY_ARMED bit
+		state.Armed = (m.BaseMode & common.MAV_MODE_FLAG_SAFETY_ARMED) != 0 
 
 	case *common.MessageGlobalPositionInt:
 		// lat/lon are int32 degrees * 1e7

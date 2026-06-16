@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/jmvaldez/aetherforge/internal/api"
 	"github.com/jmvaldez/aetherforge/internal/store"
 	"github.com/jmvaldez/aetherforge/internal/transport/ws"
 )
@@ -19,7 +20,8 @@ func startBroadcaster(ctx context.Context, st *store.Store, hub *ws.Hub) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			fleet := st.Snapshot()
+			now := time.Now()
+			fleet := api.NewFleetSnapshot(st.Snapshot(), now)
 
 			fleetToJSON, err := json.Marshal(fleet)
 			if err != nil {
