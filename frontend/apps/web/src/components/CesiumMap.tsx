@@ -244,7 +244,7 @@ function styleEntity(entity: Entity, v: Vehicle, fleetColor: Color, selected: bo
   )
   if (entity.billboard) {
     entity.billboard.rotation = new ConstantProperty(
-      CesiumMath.toRadians(-v.telemetry.heading),
+      CesiumMath.toRadians(-(v.telemetry.heading ?? 0)),
     )
     entity.billboard.color = new ConstantProperty(tint.withAlpha(offline ? 0.45 : 1))
     entity.billboard.scale = new ConstantProperty(selected ? 1.25 : 0.85)
@@ -254,7 +254,9 @@ function styleEntity(entity: Entity, v: Vehicle, fleetColor: Color, selected: bo
     entity.label.showBackground = new ConstantProperty(selected)
     entity.label.fillColor = new ConstantProperty(selected ? Color.WHITE : LABEL_DIM)
     entity.label.backgroundColor = new ConstantProperty(
-      STATUS_COLOR[v.status].withAlpha(0.85),
+			// note to self - we could probably derive the status color from
+			// other properties like link + battery 
+      STATUS_COLOR[v.status ?? 'nominal'].withAlpha(0.85),
     )
   }
 }

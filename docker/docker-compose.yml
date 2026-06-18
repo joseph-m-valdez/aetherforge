@@ -1,28 +1,31 @@
+x-px4-base: &px4-base
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+  env_file:
+    - path: .env
+      required: false
+
+x-px4-env: &px4-env
+  PX4_SYS_AUTOSTART: 10043
+  PX4_SIM_MODEL: sihsim_standard_vtol
+  PX4_HOME_ALT: ${PX4_HOME_ALT:-488.0}
+
 services:
-  px4-sitl-1:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    env_file:
-      - path: .env
-        required: false
+  # Vanguard fleet
+  vanguard-1:
+    <<: *px4-base
     environment:
-      - PX4_HOME_LAT=${PX4_HOME_LAT:-34.106447}
-      - PX4_HOME_LON=${PX4_HOME_LON:--118.104426}
-      - PX4_HOME_ALT=${PX4_HOME_ALT:-488.0}
-      - PX4_SYS_AUTOSTART=10043
-      - PX4_SIM_MODEL=sihsim_standard_vtol
-  px4-sitl-2:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    env_file:
-      - path: .env
-        required: false
+      <<: *px4-env
+      PX4_INSTANCE: 0
+      PX4_HOME_LAT: ${VANGUARD_LAT:-34.106447}
+      PX4_HOME_LON: ${VANGUARD_LON:--118.104426}
+
+  # Reaper fleet — 5 km north of Vanguard
+  reaper-1:
+    <<: *px4-base
     environment:
-      - PX4_INSTANCE=1
-      - PX4_HOME_LAT=${PX4_HOME_LAT:-34.106402}
-      - PX4_HOME_LON=${PX4_HOME_LON:--118.104426}
-      - PX4_HOME_ALT=${PX4_HOME_ALT:-488.0}
-      - PX4_SYS_AUTOSTART=10043
-      - PX4_SIM_MODEL=sihsim_standard_vtol
+      <<: *px4-env
+      PX4_INSTANCE: 1
+      PX4_HOME_LAT: ${REAPER_LAT:-34.151357}
+      PX4_HOME_LON: ${REAPER_LON:--118.104426}

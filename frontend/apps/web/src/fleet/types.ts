@@ -1,18 +1,6 @@
-// PX4 flight modes, as decoded from HEARTBEAT.custom_mode (main+sub mode).
-export type FlightMode =
-  | 'MANUAL'
-  | 'ALTCTL'
-  | 'POSCTL'
-  | 'AUTO.READY'
-  | 'AUTO.TAKEOFF'
-  | 'AUTO.LOITER'
-  | 'AUTO.MISSION'
-  | 'AUTO.RTL'
-  | 'AUTO.LAND'
-  | 'ACRO'
-  | 'OFFBOARD'
-  | 'STABILIZED'
-  | 'UNKNOWN';
+import { type FlightMode, type WireVehicle } from '../services/types.ts'
+// re-exporting Flightmode here so we dont leak the service layer into every consumer
+export type { FlightMode, WireVehicle }
 
 export type VehicleStatus = 'nominal' | 'warning' | 'critical' | 'offline'
 
@@ -25,11 +13,11 @@ export interface GeoPosition {
 }
 
 export interface Telemetry {
-  groundSpeed: number // m/s
-  airSpeed: number // m/s
-  verticalSpeed: number // m/s, positive is climbing
-  altitudeRel: number // meters above takeoff/home
-  heading: number // degrees, 0-359, true north
+  groundSpeed?: number // m/s
+  airSpeed?: number // m/s
+  verticalSpeed?: number // m/s, positive is climbing
+  altitudeRel?: number // meters above takeoff/home
+  heading?: number // degrees, 0-359, true north
   position: GeoPosition
 }
 
@@ -40,11 +28,11 @@ export interface Link {
 export interface Vehicle {
   id: string
   callsign: string
-  vclass: VehicleClass
+  vclass?: VehicleClass
   armed: boolean
   flightMode: FlightMode
-  status: VehicleStatus
-  battery: number // percent, 0-100; -1 when unknown (SYS_STATUS battery_remaining)
+  status?: VehicleStatus
+  battery?: number // percent, 0-100; -1 when unknown (SYS_STATUS battery_remaining)
   telemetry: Telemetry
   link: Link
 }
