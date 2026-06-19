@@ -7,14 +7,11 @@ import CommandInterface from './components/CommandInterface'
 import FleetManager from './components/FleetManager'
 import { useMediaQuery } from './lib/useMediaQuery'
 import type { Fleet } from './fleet/types'
-import { useFleet } from './services/useFleet';
-import { useFleetView } from './services/useFleetView';
+import { useFleetView } from './services/hooks';
 
 function App() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
-	const live = useFleet()
 	const fleets = useFleetView()
-	console.log('live vehicles', live)
 
   // Fresh object per request so re-focusing the same fleet still triggers a fly.
   const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(null)

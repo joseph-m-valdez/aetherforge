@@ -33,6 +33,8 @@ export type WireVehicle = {
 	connected: boolean;
 };
 
+export type ConnectionStatus = 'connecting' | 'up' | 'reconnecting' | 'failed';
+
 export type FleetSnapshot = {
 	type: MessageType,
 	vehicles: WireVehicle[];

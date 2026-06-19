@@ -10,3 +10,6 @@ PX4-Autopilot/
 # Local environment overrides
 .env
 
+# Claude Code local workspace (settings, scratch notes)
+.claude/
+

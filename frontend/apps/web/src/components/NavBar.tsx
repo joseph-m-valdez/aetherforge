@@ -2,6 +2,18 @@ import { useEffect, useState } from 'react'
 import { Diamond, PanelLeft, PanelRight } from 'lucide-react'
 import { Button, Menubar, Stat, type MenubarMenuSpec } from '@aetherforge/ui'
 import type { Fleet } from '../fleet/types'
+import { useFleetStatus } from '../services/hooks'
+import type { ConnectionStatus } from '../services/types'
+
+// Socket transport readout. This is distinct from the LINK stat, which counts drone
+// heartbeats. When the socket is reconnecting/failed, the drone counts are the
+// last frozen values, so this is what tells the operator to distrust them.
+const SOCKET_STATUS: Record<ConnectionStatus, { tone: 'default' | 'ok' | 'armed' | 'crit'; label: string }> = {
+  connecting: { tone: 'default', label: 'CONNECTING' },
+  up: { tone: 'ok', label: 'LIVE' },
+  reconnecting: { tone: 'armed', label: 'RETRYING' },
+  failed: { tone: 'crit', label: 'OFFLINE' },
+}
 
 const MENUS: MenubarMenuSpec[] = [
   { label: 'Mission', items: [{ label: 'New Mission' }, { label: 'Open Mission' }, { label: 'Save Plan' }] },
@@ -29,6 +41,8 @@ export default function NavBar({
   const vehicles = fleets.flatMap((f) => f.vehicles)
   const connected = vehicles.filter((v) => v.link.connected).length
   const armed = vehicles.filter((v) => v.armed).length
+
+  const socket = SOCKET_STATUS[useFleetStatus()]
 
   const [clock, setClock] = useState(() => new Date())
   useEffect(() => {
@@ -63,6 +77,9 @@ export default function NavBar({
       )}
 
       <div className="ml-auto flex items-center gap-5">
+        <Stat label="SOCKET" tone={socket.tone}>
+          {socket.label}
+        </Stat>
         <Stat label="LINK" tone="ok">
           {connected}/{vehicles.length}
         </Stat>
