@@ -4,6 +4,11 @@ bin/
 dist/
 *.log
 
+# compiled Go binaries built at repo root (leading slash = root only,
+# so backend/cmd/mavsniff source dirs are NOT ignored)
+/mavsniff
+/mavsniff-raw
+
 # PX4 source (large, cloned separately)
 PX4-Autopilot/
 
