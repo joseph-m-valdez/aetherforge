@@ -9,8 +9,15 @@ import (
 	"github.com/coder/websocket"
 )
 
+type Client struct {
+	conn    *websocket.Conn
+	send    chan []byte
+	dropped uint64
+	lastLog time.Time
+}
+
 type Hub struct {
-	clients    map[*websocket.Conn]bool
+	clients    map[*websocket.Conn]*Client
 	register   chan *websocket.Conn
 	unregister chan *websocket.Conn
 	broadcast  chan []byte
@@ -18,7 +25,7 @@ type Hub struct {
 
 func New() *Hub {
 	return &Hub{
-		clients:    make(map[*websocket.Conn]bool),
+		clients:    make(map[*websocket.Conn]*Client),
 		register:   make(chan *websocket.Conn, 16),
 		unregister: make(chan *websocket.Conn, 16),
 		broadcast:  make(chan []byte, 16),
@@ -27,6 +34,20 @@ func New() *Hub {
 
 func (h *Hub) Broadcast(msg []byte) {
 	h.broadcast <- msg
+}
+
+func (h *Hub) writePump(client *Client) {
+	for msg := range client.send {
+		writeCtx, cancel := context.WithTimeout(
+			context.Background(), 5*time.Second,
+		)
+		err := client.conn.Write(writeCtx, websocket.MessageText, msg)
+		cancel()
+		if err != nil {
+			h.unregister <- client.conn
+			return
+		}
+	}
 }
 
 func (h *Hub) Run(ctx context.Context) {
@@ -38,23 +59,31 @@ func (h *Hub) Run(ctx context.Context) {
 			}
 			return
 		case conn := <-h.register:
-			h.clients[conn] = true
+			sendCh := make(chan []byte, 16)
+			client := &Client{
+				conn: conn,
+				send: sendCh,
+			}
+			h.clients[conn] = client
+			go h.writePump(client)
 			log.Println("Client registered")
 		case conn := <-h.unregister:
-			if _, ok := h.clients[conn]; ok {
+			if c, ok := h.clients[conn]; ok {
 				delete(h.clients, conn)
+				close(c.send)
 				conn.CloseNow()
 			}
 		case msg := <-h.broadcast:
-			for c := range h.clients {
-				writeCtx, cancel := context.WithTimeout(
-					context.Background(), 5*time.Second,
-				)
-				err := c.Write(writeCtx, websocket.MessageText, msg)
-				cancel()
-				if err != nil {
-					delete(h.clients, c)
-					c.CloseNow()
+			for _, c := range h.clients {
+				select {
+				case c.send <- msg:
+				default:
+					// buffer is full, drop this frame
+					c.dropped++
+					if time.Since(c.lastLog) > 10*time.Second {
+						c.lastLog = time.Now()
+						log.Printf("client dropping frames (total %d)", c.dropped)
+					}
 				}
 			}
 		}
