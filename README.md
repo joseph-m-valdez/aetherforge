@@ -5,6 +5,9 @@ side up. QGroundControl is powerful but exposes a lot of complexity. This is an
 exploration of what a simpler, operator-focused fleet management interface could look 
 like, using real MAVLink telemetry over PX4 SITL.
 
+<img width="600" alt="AetherForge Storybook" src="https://github.com/user-attachments/assets/66a83d5e-ca33-410d-8a79-22db3845651e" />
+
+
 
 ## What is working
 
