@@ -1,78 +1,71 @@
 # AetherForge
 
-MAVLink v2 telemetry platform for tracking and managing drone fleets.
+A ground control station built from scratch to learn drone software from the operator 
+side up. QGroundControl is powerful but exposes a lot of complexity. This is an 
+exploration of what a simpler, operator-focused fleet management interface could look 
+like, using real MAVLink telemetry over PX4 SITL.
+
+
+## What is working
+
+- Live MAVLink v2 telemetry parsed from PX4 SITL
+- Real-time vehicle positions on a Cesium 3D globe
+- Per-vehicle state machine with heartbeat and GPS tracking
+- Fleet management UI with vehicle selection
+- Shared component library documented in Storybook
+
+## Stack
+
+- **Backend:** Go, gomavlib, WebSockets
+- **Frontend:** React, TypeScript, Vite, CesiumJS
+- **Simulation:** PX4 SITL via Docker (no Gazebo or GPU required)
+- **UI:** Tailwind CSS, Storybook
 
 ## Prerequisites
 
 - Go 1.24+
-- Docker & Docker Compose
-
-## Project Structure
-
-```
-backend/              Go backend (mavsniff CLI, telemetry processing)
-docker/               Docker Compose for PX4 SITL simulation
-frontend/             pnpm workspace for the web side
-  apps/web/           Dashboard app (React, Vite, Cesium map)
-  packages/ui/        Design tokens + accessible primitives, documented in Storybook
-docs/                 (planned) Documentation
-```
-
-The web side is a pnpm workspace. Install once from `frontend/` with `pnpm install`.
-Run the app with `pnpm dev` and the component library with `pnpm storybook`, both
-from the `frontend/` directory.
+- Docker and Docker Compose
+- pnpm
 
 ## Quick Start
 
-### 1. Build the PX4 SITL image (one-time)
-
-Compiles a headless PX4 standard VTOL simulation using SIH (no Gazebo/GPU required):
+### 1. Build the PX4 SITL image (one-time, ~10 minutes)
 
 ```bash
 docker compose -f docker/docker-compose.yml build
 ```
 
-This takes ~10 minutes. The image is cached by Docker so you only need to do this once.
-
-### 2. Start PX4 SITL
+### 2. Start the simulation
 
 ```bash
 docker compose -f docker/docker-compose.yml up
 ```
 
-### 3. Run the MAVLink sniffer
-
-In a separate terminal:
+### 3. Run the MAVLink backend
 
 ```bash
 go run ./backend/cmd/mavsniff/
 ```
 
-Listens on `0.0.0.0:14550` and prints parsed MAVLink telemetry (heartbeats, GPS positions) as JSON.
-
-#### Flags
-
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--local` | `14550` | Local UDP listen port |
-| `--veh-port` | `14540` | Vehicle MAVLink port |
-| `--veh-host` | `127.0.0.1` | Vehicle host address |
-| `--bind` | `0.0.0.0` | Local bind address |
-
-### 4. Stop
+### 4. Start the dashboard
 
 ```bash
-docker compose -f docker/docker-compose.yml down
+cd frontend && pnpm install && pnpm dev
 ```
 
-## Maps (dev only)
+## Project Structure
 
-The dashboard renders a Cesium globe. Right now it pulls map tiles from
-OpenStreetMap's public tile server. This is for local development only. OSM's
-tile usage policy does not cover production or app traffic, so do not ship it
-as it stands.
+```
+backend/       Go backend, MAVLink node, WebSocket hub
+docker/        PX4 SITL Docker setup
+frontend/
+  apps/web/    React dashboard with Cesium map
+  packages/ui/ Design tokens and component library
+```
 
-For production, switch the tile source to a keyed provider such as MapTiler,
-Stadia Maps, or Thunderforest. The only change needed is the `TILE_URL`
-constant in `frontend/apps/web/src/components/CesiumMap.tsx`. Serving tiles
-offline is a separate piece of work we have put off for later.
+## Maps
+
+The dashboard uses OpenStreetMap tiles for local development only.
+OSM's usage policy does not cover production traffic. For production,
+swap the tile source to MapTiler, Stadia Maps, or similar by updating
+`TILE_URL` in `CesiumMap.tsx`.
