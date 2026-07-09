@@ -2,6 +2,7 @@ package ws
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -16,19 +17,26 @@ type Client struct {
 	lastLog time.Time
 }
 
+type Commander interface {
+	Arm(sysID uint8) error
+	Disarm(sysID uint8) error
+}
+
 type Hub struct {
 	clients    map[*websocket.Conn]*Client
 	register   chan *websocket.Conn
 	unregister chan *websocket.Conn
 	broadcast  chan []byte
+	commander  Commander
 }
 
-func New() *Hub {
+func New(commander Commander) *Hub {
 	return &Hub{
 		clients:    make(map[*websocket.Conn]*Client),
 		register:   make(chan *websocket.Conn, 16),
 		unregister: make(chan *websocket.Conn, 16),
 		broadcast:  make(chan []byte, 16),
+		commander:  commander,
 	}
 }
 
@@ -90,6 +98,16 @@ func (h *Hub) Run(ctx context.Context) {
 	}
 }
 
+type commandEnvelope struct {
+	Type    string  `json:"type"`
+	Command command `json:"command"`
+}
+
+type command struct {
+	Kind     string `json:"kind"`
+	TargetID uint8  `json:"targetId"`
+}
+
 func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
 		OriginPatterns: []string{"localhost:5173"},
@@ -103,7 +121,7 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.register <- conn
 
 	for {
-		_, _, err = conn.Read(r.Context())
+		_, data, err := conn.Read(r.Context())
 		status := websocket.CloseStatus(err)
 		if status == websocket.StatusNormalClosure || status == websocket.StatusGoingAway {
 			h.unregister <- conn
@@ -113,6 +131,30 @@ func (h *Hub) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Printf("failed to echo with %v: %v", r.RemoteAddr, err)
 			h.unregister <- conn
 			return
+		}
+
+		var cmd commandEnvelope
+		err = json.Unmarshal(data, &cmd)
+		if err != nil {
+			log.Printf("Error unmarshaling %v", err)
+			continue
+		}
+
+		if cmd.Type == "command" {
+			switch cmd.Command.Kind {
+			case "ARM":
+				err := h.commander.Arm(cmd.Command.TargetID)
+				if err != nil {
+					log.Printf("Failed to ARM target: %v err: %v", cmd.Command.TargetID, err)
+				}
+			case "DISARM":
+				err := h.commander.Disarm(cmd.Command.TargetID)
+				if err != nil {
+					log.Printf("Failed to DISARM target: %v err: %v", cmd.Command.TargetID, err)
+				}
+			default:
+				log.Printf("Unknown kind %v", cmd.Command.Kind)
+			}
 		}
 	}
 }

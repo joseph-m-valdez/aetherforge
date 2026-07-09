@@ -25,7 +25,7 @@ func main() {
 	}
 
 	st := store.New()
-	hub := ws.New()
+	hub := ws.New(node)
 	errCh := make(chan error, 2)
 
 	go func() { errCh <- node.Run(ctx, st) }()
@@ -56,6 +56,5 @@ func main() {
 		shutdownContext, cancel := context.WithTimeout(context.Background(), time.Second*5)
 		defer cancel()
 		srv.Shutdown(shutdownContext)
-
 	}
 }

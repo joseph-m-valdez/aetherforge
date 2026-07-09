@@ -38,6 +38,32 @@ func (n *Node) events() <-chan gomavlib.Event { return n.node.Events() }
 
 func (n *Node) Close() { n.node.Close() }
 
+func (n *Node) sendCommand(sysID uint8, cmd common.MAV_CMD, params ...float32) error {
+	if len(params) > 7 {
+		return fmt.Errorf("sendCommand: %d params, COMMAND_LONG holds max 7", len(params))
+	}
+	msg := &common.MessageCommandLong{
+		TargetSystem:    sysID,
+		TargetComponent: 1,
+		Command:         cmd,
+	}
+
+	// params[0] -> Param1, params[1] -> Param2, etc...
+	fields := []*float32{&msg.Param1, &msg.Param2, &msg.Param3, &msg.Param4, &msg.Param5, &msg.Param6, &msg.Param7}
+	for i, p := range params {
+		*fields[i] = p
+	}
+	return n.node.WriteMessageAll(msg)
+}
+
+func (n *Node) Arm(sysID uint8) error {
+	return n.sendCommand(sysID, common.MAV_CMD_COMPONENT_ARM_DISARM, float32(common.MAV_BOOL_TRUE))
+}
+
+func (n *Node) Disarm(sysID uint8) error {
+	return n.sendCommand(sysID, common.MAV_CMD_COMPONENT_ARM_DISARM, float32(common.MAV_BOOL_FALSE))
+}
+
 func (n *Node) Run(ctx context.Context, st *store.Store) error {
 	errCh := make(chan error, 1)
 	done := make(chan struct{})
