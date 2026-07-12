@@ -52,12 +52,7 @@ interface Props {
   focusTarget: FocusTarget | null
 }
 
-export default function CesiumMap({
-  fleets,
-  selectedIds,
-  onSelectVehicle,
-  focusTarget,
-}: Props) {
+export default function CesiumMap({ fleets, selectedIds, onSelectVehicle, focusTarget }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewerRef = useRef<Viewer | null>(null)
   const entitiesRef = useRef<Map<string, Entity>>(new Map())
@@ -110,11 +105,7 @@ export default function CesiumMap({
     }
 
     viewer.camera.setView({
-      destination: Cartesian3.fromDegrees(
-        INITIAL_VIEW.lon,
-        INITIAL_VIEW.lat,
-        VIEW_HEIGHT_M,
-      ),
+      destination: Cartesian3.fromDegrees(INITIAL_VIEW.lon, INITIAL_VIEW.lat, VIEW_HEIGHT_M),
     })
 
     const clickHandler = new ScreenSpaceEventHandler(viewer.scene.canvas)
@@ -172,11 +163,7 @@ export default function CesiumMap({
     const viewer = viewerRef.current
     if (!viewer || !focusTarget) return
     viewer.camera.flyTo({
-      destination: Cartesian3.fromDegrees(
-        focusTarget.lon,
-        focusTarget.lat,
-        VIEW_HEIGHT_M,
-      ),
+      destination: Cartesian3.fromDegrees(focusTarget.lon, focusTarget.lat, VIEW_HEIGHT_M),
       duration: 1.5,
     })
   }, [focusTarget])
@@ -195,8 +182,8 @@ export default function CesiumMap({
           <code className="font-mono text-accent">false</code>,{' '}
           <code className="font-mono text-accent">webgl.forceEnabled</code> to{' '}
           <code className="font-mono text-accent">true</code>, and turn off{' '}
-          <code className="font-mono text-accent">privacy.resistFingerprinting</code>{' '}
-          (or allow WebGL for this site), then reload.
+          <code className="font-mono text-accent">privacy.resistFingerprinting</code> (or allow
+          WebGL for this site), then reload.
         </p>
       </div>
     )
@@ -239,9 +226,7 @@ function styleEntity(entity: Entity, v: Vehicle, fleetColor: Color, selected: bo
   const tint = offline ? STATUS_COLOR.offline : fleetColor
   const p = v.telemetry.position
 
-  entity.position = new ConstantPositionProperty(
-    Cartesian3.fromDegrees(p.lon, p.lat, p.altMSL),
-  )
+  entity.position = new ConstantPositionProperty(Cartesian3.fromDegrees(p.lon, p.lat, p.altMSL))
   if (entity.billboard) {
     entity.billboard.rotation = new ConstantProperty(
       CesiumMath.toRadians(-(v.telemetry.heading ?? 0)),
@@ -254,8 +239,8 @@ function styleEntity(entity: Entity, v: Vehicle, fleetColor: Color, selected: bo
     entity.label.showBackground = new ConstantProperty(selected)
     entity.label.fillColor = new ConstantProperty(selected ? Color.WHITE : LABEL_DIM)
     entity.label.backgroundColor = new ConstantProperty(
-			// note to self - we could probably derive the status color from
-			// other properties like link + battery 
+      // note to self - we could probably derive the status color from
+      // other properties like link + battery
       STATUS_COLOR[v.status ?? 'nominal'].withAlpha(0.85),
     )
   }

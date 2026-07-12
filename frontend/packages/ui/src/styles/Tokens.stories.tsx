@@ -54,9 +54,7 @@ export const Typography: Story = {
       {TEXT_SIZES.map((size) => (
         <div key={size} className="flex items-baseline gap-4">
           <span className="w-16 font-mono text-xs text-text-dim">text-{size}</span>
-          <span className={`text-${size} text-text-bright`}>
-            Fleet Command HUD 0123456789
-          </span>
+          <span className={`text-${size} text-text-bright`}>Fleet Command HUD 0123456789</span>
         </div>
       ))}
       <div className="mt-4 flex flex-col gap-2">

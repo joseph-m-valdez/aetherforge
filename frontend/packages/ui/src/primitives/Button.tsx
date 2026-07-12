@@ -13,15 +13,13 @@ const button = cva(
   {
     variants: {
       intent: {
-        default:
-          'border-border bg-btn text-text-bright hover:border-accent hover:bg-hover',
+        default: 'border-border bg-btn text-text-bright hover:border-accent hover:bg-hover',
         ok: 'border-ok/45 bg-transparent text-ok hover:bg-ok/15',
         warn: 'border-armed/45 bg-transparent text-armed hover:bg-armed/15',
         crit: 'border-crit/50 bg-transparent text-crit hover:bg-crit/15',
         estop:
           'border-crit/50 bg-crit/15 font-bold uppercase tracking-wide text-crit hover:bg-crit/25',
-        ghost:
-          'border-transparent bg-transparent text-text hover:bg-hover hover:text-text-bright',
+        ghost: 'border-transparent bg-transparent text-text hover:bg-hover hover:text-text-bright',
       },
       size: {
         sm: 'min-h-9 px-2.5 text-xs',
@@ -35,8 +33,7 @@ const button = cva(
 )
 
 export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof button> {
+  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof button> {
   // Render the child element instead of a <button> (e.g. wrap a link or a
   // Radix trigger) while keeping the button styling. Backed by Radix Slot.
   asChild?: boolean

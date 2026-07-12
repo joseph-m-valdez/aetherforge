@@ -7,8 +7,13 @@
     "dev": "pnpm --filter @aetherforge/web dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
+    "format": "prettier --write \"apps/*/src/**/*.{ts,tsx,css}\" \"packages/*/src/**/*.{ts,tsx,css}\"",
+    "format:check": "prettier --check \"apps/*/src/**/*.{ts,tsx,css}\" \"packages/*/src/**/*.{ts,tsx,css}\"",
     "preview": "pnpm --filter @aetherforge/web preview",
     "storybook": "pnpm --filter @aetherforge/ui storybook",
     "build-storybook": "pnpm --filter @aetherforge/ui build-storybook"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.5"
   }
 }

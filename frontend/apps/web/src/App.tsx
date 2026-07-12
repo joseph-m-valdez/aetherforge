@@ -7,11 +7,11 @@ import CommandInterface from './components/CommandInterface'
 import FleetManager from './components/FleetManager'
 import { useMediaQuery } from './lib/useMediaQuery'
 import type { Fleet } from './fleet/types'
-import { useFleetView } from './services/hooks';
+import { useFleetView } from './services/hooks'
 
 function App() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
-	const fleets = useFleetView()
+  const fleets = useFleetView()
 
   // Fresh object per request so re-focusing the same fleet still triggers a fly.
   const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(null)
@@ -49,8 +49,7 @@ function App() {
     })
   }
 
-  const selectAll = () =>
-    setSelected(new Set(fleets.flatMap((f) => f.vehicles).map((v) => v.id)))
+  const selectAll = () => setSelected(new Set(fleets.flatMap((f) => f.vehicles).map((v) => v.id)))
   const deselectAll = () => setSelected(new Set())
 
   const selectedIds = [...selected]

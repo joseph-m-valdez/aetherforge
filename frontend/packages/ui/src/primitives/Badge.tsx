@@ -18,9 +18,7 @@ const badge = cva(
   },
 )
 
-export interface BadgeProps
-  extends HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badge> {}
+export interface BadgeProps extends HTMLAttributes<HTMLSpanElement>, VariantProps<typeof badge> {}
 
 // Small monospace pill for flight modes, counts, and status labels.
 export function Badge({ className, tone, ...props }: BadgeProps) {

@@ -1,12 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import {
-  Button,
-  ConfirmDialog,
-  NumberField,
-  Select,
-  SegmentedControl,
-  cn,
-} from '@aetherforge/ui'
+import { Button, ConfirmDialog, NumberField, Select, SegmentedControl, cn } from '@aetherforge/ui'
 import type { Command, CommandKind, CommandMode, FlightMode } from '../fleet/types'
 import { useIssueCommand } from '../services/hooks'
 

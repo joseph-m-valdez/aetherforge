@@ -8,7 +8,10 @@ import type { ConnectionStatus } from '../services/types'
 // Socket transport readout. This is distinct from the LINK stat, which counts drone
 // heartbeats. When the socket is reconnecting/failed, the drone counts are the
 // last frozen values, so this is what tells the operator to distrust them.
-const SOCKET_STATUS: Record<ConnectionStatus, { tone: 'default' | 'ok' | 'armed' | 'crit'; label: string }> = {
+const SOCKET_STATUS: Record<
+  ConnectionStatus,
+  { tone: 'default' | 'ok' | 'armed' | 'crit'; label: string }
+> = {
   connecting: { tone: 'default', label: 'CONNECTING' },
   up: { tone: 'ok', label: 'LIVE' },
   reconnecting: { tone: 'armed', label: 'RETRYING' },
@@ -16,11 +19,20 @@ const SOCKET_STATUS: Record<ConnectionStatus, { tone: 'default' | 'ok' | 'armed'
 }
 
 const MENUS: MenubarMenuSpec[] = [
-  { label: 'Mission', items: [{ label: 'New Mission' }, { label: 'Open Mission' }, { label: 'Save Plan' }] },
-  { label: 'Fleet Config', items: [{ label: 'Add Vehicle' }, { label: 'Calibrate' }, { label: 'Failsafes' }] },
+  {
+    label: 'Mission',
+    items: [{ label: 'New Mission' }, { label: 'Open Mission' }, { label: 'Save Plan' }],
+  },
+  {
+    label: 'Fleet Config',
+    items: [{ label: 'Add Vehicle' }, { label: 'Calibrate' }, { label: 'Failsafes' }],
+  },
   { label: 'Telemetry', items: [{ label: 'Live Feed' }, { label: 'Replay' }, { label: 'Export' }] },
   { label: 'Logging', items: [{ label: 'Event Log' }, { label: 'Download Logs' }] },
-  { label: 'Settings', items: [{ label: 'Preferences' }, { label: 'Map Source' }, { label: 'About' }] },
+  {
+    label: 'Settings',
+    items: [{ label: 'Preferences' }, { label: 'Map Source' }, { label: 'About' }],
+  },
 ]
 
 interface Props {

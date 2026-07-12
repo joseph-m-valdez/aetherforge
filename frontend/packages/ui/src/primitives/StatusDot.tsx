@@ -34,11 +34,6 @@ export interface StatusDotProps {
 export function StatusDot({ status = 'nominal', label, className }: StatusDotProps) {
   const text = label ?? DEFAULT_LABEL[status]
   return (
-    <span
-      className={cn(dot({ status }), className)}
-      role="img"
-      aria-label={text}
-      title={text}
-    />
+    <span className={cn(dot({ status }), className)} role="img" aria-label={text} title={text} />
   )
 }

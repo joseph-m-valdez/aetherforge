@@ -11,11 +11,7 @@ export {
   type SegmentOption,
 } from './primitives/ToggleGroup'
 export { Select, type SelectProps, type SelectOption } from './primitives/Select'
-export {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from './primitives/Collapsible'
+export { Collapsible, CollapsibleTrigger, CollapsibleContent } from './primitives/Collapsible'
 export { NumberField, type NumberFieldProps } from './primitives/NumberField'
 export { Badge, type BadgeProps } from './primitives/Badge'
 export { StatusDot, type StatusDotProps, type StatusTone } from './primitives/StatusDot'

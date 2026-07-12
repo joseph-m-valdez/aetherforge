@@ -49,8 +49,18 @@ export const fleets: Fleet[] = [
     color: '#f5a623',
     vehicles: [
       vehicle({ id: 'viper', callsign: 'Viper', vclass: 'FIXED_WING' }, -0.0005, 0.0125, 188),
-      vehicle({ id: 'talon', callsign: 'Talon', vclass: 'FIXED_WING', battery: 57 }, -0.0001, 0.013, 201),
-      vehicle({ id: 'havoc', callsign: 'Havoc', vclass: 'FIXED_WING', battery: 71 }, -0.0008, 0.0123, 176),
+      vehicle(
+        { id: 'talon', callsign: 'Talon', vclass: 'FIXED_WING', battery: 57 },
+        -0.0001,
+        0.013,
+        201,
+      ),
+      vehicle(
+        { id: 'havoc', callsign: 'Havoc', vclass: 'FIXED_WING', battery: 71 },
+        -0.0008,
+        0.0123,
+        176,
+      ),
       vehicle(
         { id: 'razor', callsign: 'Razor', vclass: 'FIXED_WING', battery: 14, status: 'critical' },
         -0.0003,
@@ -64,9 +74,20 @@ export const fleets: Fleet[] = [
     name: 'Spectre',
     color: '#a06bff',
     vehicles: [
-      vehicle({ id: 'phantom', callsign: 'Phantom', flightMode: 'AUTO.RTL', battery: 53 }, 0.0125, -0.0006, 96),
       vehicle(
-        { id: 'banshee', callsign: 'Banshee', flightMode: 'AUTO.RTL', battery: 22, status: 'warning' },
+        { id: 'phantom', callsign: 'Phantom', flightMode: 'AUTO.RTL', battery: 53 },
+        0.0125,
+        -0.0006,
+        96,
+      ),
+      vehicle(
+        {
+          id: 'banshee',
+          callsign: 'Banshee',
+          flightMode: 'AUTO.RTL',
+          battery: 22,
+          status: 'warning',
+        },
         0.013,
         -0.0001,
         102,

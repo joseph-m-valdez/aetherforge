@@ -12,15 +12,9 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const FLIGHT_MODES = [
-  'GUIDED',
-  'AUTO',
-  'RTL',
-  'LOITER',
-  'LAND',
-  'STABILIZE',
-  'MANUAL',
-].map((m) => ({ value: m, label: m }))
+const FLIGHT_MODES = ['GUIDED', 'AUTO', 'RTL', 'LOITER', 'LAND', 'STABILIZE', 'MANUAL'].map(
+  (m) => ({ value: m, label: m }),
+)
 
 export const FlightMode: Story = {
   render: () => {

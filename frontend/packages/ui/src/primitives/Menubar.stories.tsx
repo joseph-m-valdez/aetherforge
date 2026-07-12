@@ -15,11 +15,7 @@ export const AppMenus: Story = {
     menus: [
       {
         label: 'Mission',
-        items: [
-          { label: 'New Mission' },
-          { label: 'Open Mission' },
-          { label: 'Save Plan' },
-        ],
+        items: [{ label: 'New Mission' }, { label: 'Open Mission' }, { label: 'Save Plan' }],
       },
       {
         label: 'Fleet Config',
