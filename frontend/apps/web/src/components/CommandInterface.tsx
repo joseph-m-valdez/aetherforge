@@ -7,7 +7,8 @@ import {
   SegmentedControl,
   cn,
 } from '@aetherforge/ui'
-import type { CommandKind, CommandMode, FlightMode } from '../fleet/types'
+import type { Command, CommandKind, CommandMode, FlightMode } from '../fleet/types'
+import { useIssueCommand } from '../services/hooks'
 
 const MODES: { value: CommandMode; label: string }[] = [
   { value: 'PLANNING', label: 'Planning' },
@@ -44,11 +45,16 @@ export default function CommandInterface({ selectedIds, className }: Props) {
   const count = selectedIds.length
   const hasSelection = count > 0
 
-  function issue(kind: CommandKind, detail?: string) {
+  const issueCommand = useIssueCommand()
+  function issue(kind: CommandKind) {
     if (!hasSelection) return
-    setLastAction(
-      `${kind}${detail ? ` (${detail})` : ''} sent to ${count} vehicle${count > 1 ? 's' : ''}`,
-    )
+
+    const command: Command = {
+      kind: kind,
+      targetIds: selectedIds,
+    }
+    issueCommand(command)
+    setLastAction(`${kind} sent to ${count} vehicle${count > 1 ? 's' : ''}`)
   }
 
   return (
@@ -84,34 +90,32 @@ export default function CommandInterface({ selectedIds, className }: Props) {
           <Select
             aria-label="Flight mode"
             value={flightMode}
-            onValueChange={(v) => {
-              setFlightMode(v as FlightMode)
-              issue('SET_MODE', v)
-            }}
+            onValueChange={(v) => setFlightMode(v as FlightMode)}
             options={FLIGHT_MODES.map((fm) => ({ value: fm, label: fm }))}
+            disabled
           />
         </label>
       </Section>
 
       <Section legend="Mission Control" disabled={!hasSelection}>
-        <Button intent="ok" className="w-full" onClick={() => issue('START_MISSION')}>
+        <Button intent="ok" className="w-full" disabled>
           Start Mission
         </Button>
         <div className="flex gap-2">
-          <Button intent="warn" className="flex-1" onClick={() => issue('PAUSE_MISSION')}>
+          <Button intent="warn" className="flex-1" disabled>
             Pause
           </Button>
-          <Button intent="crit" className="flex-1" onClick={() => issue('STOP_MISSION')}>
+          <Button intent="crit" className="flex-1" disabled>
             Stop
           </Button>
         </div>
-        <Button className="w-full" onClick={() => issue('CLEAR_MISSION')}>
+        <Button className="w-full" disabled>
           Clear Mission
         </Button>
       </Section>
 
       <Section legend="Quick Commands" disabled={!hasSelection}>
-        <Button className="w-full" onClick={() => issue('RTL')}>
+        <Button className="w-full" disabled>
           Return to Home
         </Button>
         <NumberField
@@ -124,10 +128,10 @@ export default function CommandInterface({ selectedIds, className }: Props) {
           onChange={setTakeoffAlt}
         />
         <div className="flex gap-2">
-          <Button className="flex-1" onClick={() => issue('TAKEOFF', `${takeoffAlt}m`)}>
+          <Button className="flex-1" disabled>
             Take Off
           </Button>
-          <Button className="flex-1" onClick={() => issue('LAND')}>
+          <Button className="flex-1" disabled>
             Land
           </Button>
         </div>
@@ -140,9 +144,9 @@ export default function CommandInterface({ selectedIds, className }: Props) {
           confirmLabel="Cut Motors"
           cancelLabel="Cancel"
           intent="crit"
-          onConfirm={() => issue('EMERGENCY_STOP')}
+          onConfirm={() => {}}
           trigger={
-            <Button intent="estop" className="w-full">
+            <Button intent="estop" className="w-full" disabled>
               Emergency Stop
             </Button>
           }

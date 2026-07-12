@@ -1,5 +1,9 @@
-import type { ConnectionStatus, FleetSnapshot } from "./types";
+import type { CommandEnvelope, ConnectionStatus, FleetSnapshot } from "./types";
 
+type Connect = {
+	send: (cmd: CommandEnvelope) => void;
+	disconnect: () => void;
+};
 
 export type SnapshotCallback = (snap: FleetSnapshot) => void;
 export type StatusCallback = (status: ConnectionStatus) => void;
@@ -16,12 +20,22 @@ function createMessageHandler(onSnapshot: SnapshotCallback) {
 	};
 }
 
-export function connect(onSnapshot: SnapshotCallback, onStatus: StatusCallback): () => void {
+
+export function connect(onSnapshot: SnapshotCallback, onStatus: StatusCallback): Connect {
 	let attempt = 0;
-	let closed = false;
+	let closed = false; // apps intent.. we are done, never reconnect.
 	const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 	let ws: WebSocket;
+
+	function send(commandEnvelope: CommandEnvelope) {
+		if (!ws || ws.readyState != WebSocket.OPEN) {
+			console.warn('send() called when socket is not open; dropping message');
+			return;
+		}
+		ws.send(JSON.stringify(commandEnvelope));
+	}
+
 	async function openWs() {
 		if (closed) { return; }
 		ws = new WebSocket('ws://localhost:8080/ws');
@@ -62,11 +76,12 @@ export function connect(onSnapshot: SnapshotCallback, onStatus: StatusCallback):
 
 	openWs();
 
-	return () => {
+	const disconnect = () => {
+		closed = true;
 		ws.onmessage = null;
 		if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
-			closed = true;
 			ws.close(1000);
 		}
 	};
+	return { send, disconnect };
 };

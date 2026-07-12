@@ -2,7 +2,7 @@ import { atom } from 'jotai';
 import { connect } from './socket';
 import { fleetConfigAtom } from '../fleet/config';
 import type { Fleet, Vehicle } from '../fleet/types';
-import { type ConnectionStatus, type FleetSnapshot, type WireVehicle } from './types';
+import { type CommandEnvelope, type ConnectionStatus, type FleetSnapshot, type WireVehicle } from './types';
 
 // The atom graph, top to bottom:
 //   connectionAtom (owns the socket)
@@ -14,18 +14,22 @@ import { type ConnectionStatus, type FleetSnapshot, type WireVehicle } from './t
 type Conn = {
 	snapshot: FleetSnapshot | null;
 	status: ConnectionStatus;
+	send: ((env: CommandEnvelope) => void) | null;
 };
 
-const connectionAtom = atom<Conn>({ snapshot: null, status: 'connecting' });
+const connectionAtom = atom<Conn>({ snapshot: null, status: 'connecting', send: null });
 connectionAtom.onMount = (set) => {
-	return connect(
+	const { send, disconnect } = connect(
 		(snap) => set((c) => ({ ...c, snapshot: snap })),
 		(status) => set((c) => ({ ...c, status: status })),
 	);
+	set((c) => ({ ...c, send: send }));
+	return disconnect;
 };
 
 const fleetAtom = atom((get) => get(connectionAtom).snapshot);
 export const fleetStatusAtom = atom((get) => get(connectionAtom).status);
+export const sendEnvelopeAtom = atom((get) => get(connectionAtom).send);
 
 const vehiclesByIdAtom = atom<Map<number, WireVehicle>>((get) => {
 	const fleet = get(fleetAtom);

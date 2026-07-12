@@ -46,18 +46,7 @@ export interface Fleet {
 
 export type CommandMode = 'PLANNING' | 'OPERATION' | 'FORMATION' | 'SWARM'
 
-export type CommandKind =
-  | 'ARM'
-  | 'DISARM'
-  | 'SET_MODE'
-  | 'START_MISSION'
-  | 'PAUSE_MISSION'
-  | 'STOP_MISSION'
-  | 'CLEAR_MISSION'
-  | 'RTL'
-  | 'TAKEOFF'
-  | 'LAND'
-  | 'EMERGENCY_STOP'
+export type CommandKind = 'ARM' | 'DISARM'
 
 export interface Command {
   kind: CommandKind
